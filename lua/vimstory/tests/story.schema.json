@@ -1,3 +1,4 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema"
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/gnodar01/vimstory/raw/refs/heads/main/lua/vimstory/tests/story.schema.json"
 }
