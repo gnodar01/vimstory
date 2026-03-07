@@ -52,6 +52,13 @@
       "description": "Absolute path to root of project directory (hash should match filename without file ext)",
       "type": "string",
       "pattern": "^/.*$"
+    },
+    "activeStory": {
+      "description": "Currently active story for the project",
+      "type": [
+        "string",
+        "null"
+      ]
     }
   },
   "patternProperties": {
@@ -83,7 +90,8 @@
     }
   },
   "required": [
-    "rootPath"
+    "rootPath",
+    "activeStory"
   ],
   "additionalProperties": false
 }

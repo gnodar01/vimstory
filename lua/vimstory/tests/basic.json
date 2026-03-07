@@ -1,5 +1,6 @@
 {
   "rootPath": "/foo/bar",
+  "activeStory": "story1",
   "story1": {
     "description": "The first story",
     "nodes": [
