@@ -1,0 +1,18 @@
+{
+  "rootPath": "/foo/bar",
+  "story1": {
+    "description": "The first story",
+    "nodes": [
+      {
+        "storyNames": [
+          "story1"
+        ],
+        "file": "baz/hello.txt",
+        "lineStart": 0,
+        "lineEnd": 5,
+        "colStart": 0,
+        "colEnd": 3
+      }
+    ]
+  }
+}
