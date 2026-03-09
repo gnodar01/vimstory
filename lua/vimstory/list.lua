@@ -51,14 +51,6 @@ end
 --- @class VimstoryListItem
 --- @field value string
 
---- @class VimstoryList
---- @field driver VimstoryPartialDriverItem
---- @field name string
---- @field _length number
---- @field _index number
---- @field items VimstoryListItem[]
-local VimstoryList = {}
-
 ---@param items VimstoryListItem[]
 ---@param length integer
 ---@param element any
@@ -80,7 +72,16 @@ local function index_of(items, length, element, driver)
   return index
 end
 
+--- @class VimstoryList
+--- @field driver VimstoryPartialDriverItem
+--- @field name string
+--- @field _length number
+--- @field _index number
+--- @field items VimstoryListItem[]
+
+local VimstoryList = {}
 VimstoryList.__index = VimstoryList
+
 ---@param driver VimstoryPartialDriverItem
 ---@param name string
 ---@param items VimstoryListItem[]
