@@ -7,19 +7,31 @@ end
 ---@alias VimstoryListFileItem {value: string, context: {row: integer, col: integer}}
 ---@alias VimstoryListFileOptions {split: boolean, vsplit: boolean, tabedit: boolean}
 
----@class VimstoryPartialDriverItem
+---@class VimstoryPartialDriver
 ---@field select_with_nil? boolean defaults to false
 ---@field display? (fun(list_item: VimstoryListItem): string)
 ---@field equals? (fun(list_line_a: any, list_line_b: VimstoryListItem): boolean)
 ---@field get_root_dir? fun(): string
----@field create_list_item? fun(driver: VimstoryPartialDriverItem, name: string?): VimstoryListItem
+---@field create_list_item? fun(name: string?, driver_override: VimstoryDriverOverride?): VimstoryListItem
 ---@field select? (fun(list_item?: VimstoryListItem, options: any?): nil)
 ---@field encode? (fun(list_item: VimstoryListItem): string) | boolean
 ---@field decode? (fun(obj: string): any)
 
+---@class VimstoryDriver
+---@field select_with_nil boolean defaults to false
+---@field display (fun(list_item: VimstoryListItem): string)
+---@field equals (fun(list_line_a: any, list_line_b: VimstoryListItem): boolean)
+---@field get_root_dir fun(): string
+---@field create_list_item fun(name: string?, driver_override: VimstoryDriverOverride?): VimstoryListItem
+---@field select (fun(list_item?: VimstoryListItem, options: any?): nil)
+---@field encode (fun(list_item: VimstoryListItem): string) | boolean
+---@field decode (fun(obj: string): any)
+
+---@alias VimstoryDriverOverride (VimstoryPartialDriver | VimstoryDriver)
+
 local M = {}
 
----@return VimstoryPartialDriverItem
+---@return VimstoryDriver
 function M.get_default_driver()
   return {
     --- select_with_nill allows for a list to call select even if the provided item is nil
@@ -47,10 +59,11 @@ function M.get_default_driver()
       return vim.uv.cwd()
     end,
 
-    ---@param driver VimstoryPartialDriverItem
     ---@param name? string
+    ---@param driver_override? VimstoryDriverOverride
     ---@return VimstoryListItem
-    create_list_item = function(driver, name)
+    create_list_item = function(name, driver_override)
+      local driver = driver_override and M.merge_driver(driver_override) or M.get_default_driver()
       name = name or normalize_path(vim.api.nvim_buf_get_name(vim.api.nvim_get_current_buf()), driver.get_root_dir())
 
       local bufnr = vim.fn.bufnr(name, false)
@@ -142,6 +155,16 @@ function M.get_default_driver()
       return vim.json.decode(str)
     end,
   }
+end
+
+---@param partial_driver VimstoryDriverOverride?
+---@param full_driver VimstoryDriver?
+---@return VimstoryDriver
+function M.merge_driver(partial_driver, full_driver)
+  partial_driver = partial_driver or {}
+  local driver = full_driver or M.get_default_driver()
+  vim.tbl_extend('force', driver, partial_driver)
+  return driver
 end
 
 return M

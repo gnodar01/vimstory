@@ -1,4 +1,5 @@
 local utils = require('vimstory.utils')
+local mdriver = require('vimstory.driver')
 
 ---@param arr any[]
 ---@return integer
@@ -54,10 +55,10 @@ end
 ---@param items VimstoryListItem[]
 ---@param length integer
 ---@param element any
----@param driver? VimstoryPartialDriverItem
+---@param driver_override? VimstoryDriverOverride
 ---@return integer
-local function index_of(items, length, element, driver)
-  local equals = driver and driver.equals or function(a, b)
+local function index_of(items, length, element, driver_override)
+  local equals = driver_override and driver_override.equals or function(a, b)
     return a == b
   end
   local index = -1
@@ -73,7 +74,7 @@ local function index_of(items, length, element, driver)
 end
 
 --- @class VimstoryList
---- @field driver VimstoryPartialDriverItem
+--- @field driver VimstoryDriver
 --- @field name string
 --- @field _length number
 --- @field _index number
@@ -82,14 +83,13 @@ end
 local VimstoryList = {}
 VimstoryList.__index = VimstoryList
 
----@param driver VimstoryPartialDriverItem
 ---@param name string
 ---@param items VimstoryListItem[]
-function VimstoryList:new(driver, name, items)
+function VimstoryList:new(name, items)
   items = items or {}
   return setmetatable({
     items = items,
-    driver = driver,
+    driver = mdriver.get_default_driver(),
     name = name,
     _length = guess_length(items),
     _index = 1,
@@ -109,9 +109,11 @@ end
 ---@param idx number
 ---@param item? VimstoryListItem
 function VimstoryList:replace_at(idx, item)
-  item = item or self.driver.create_list_item(self.driver)
+  ---@type VimstoryDriver
+  local driver = self.driver
+  item = item or driver.create_list_item()
 
-  local current_idx = index_of(self.items, self._length, item, self.driver)
+  local current_idx = index_of(self.items, self._length, item, driver)
 
   self.items[idx] = item
 
@@ -128,9 +130,11 @@ end
 
 ---@param item? VimstoryListItem
 function VimstoryList:add(item)
-  item = item or self.driver.create_list_item(self.driver)
+  ---@type VimstoryDriver
+  local driver = self.driver
+  item = item or driver.create_list_item()
 
-  local index = index_of(self.items, self._length, item, self.driver)
+  local index = index_of(self.items, self._length, item, driver)
 
   if index == -1 then
     local idx = self._length + 1
@@ -153,7 +157,9 @@ end
 ---@param item? VimstoryListItem
 ---@return VimstoryList
 function VimstoryList:prepend(item)
-  item = item or self.driver.create_list_item(self.driver)
+  ---@type VimstoryDriver
+  local driver = self.driver
+  item = item or driver.create_list_item()
 
   local index = index_of(self.items, self._length, item, self.driver)
 
@@ -328,7 +334,7 @@ function VimstoryList:encode()
 end
 
 --- @return VimstoryList
---- @param list_driver VimstoryPartialDriverItem
+--- @param list_driver VimstoryDriver
 --- @param name string
 --- @param items string[]
 function VimstoryList.decode(list_driver, name, items)
@@ -337,7 +343,7 @@ function VimstoryList.decode(list_driver, name, items)
     list_items[k] = item ~= vim.NIL and list_driver.decode(item) or nil
   end
 
-  return VimstoryList:new(list_driver, name, list_items)
+  return VimstoryList:new(name, list_items)
 end
 
 return VimstoryList
