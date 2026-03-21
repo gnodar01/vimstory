@@ -1,5 +1,6 @@
+require('plenary')
 local List = require('vimstory.list')
-local Driver = require('vimstory.driver')
+
 local eq = assert.are.same
 
 describe('list', function()
